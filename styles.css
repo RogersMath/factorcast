@@ -1,320 +1,121 @@
-/* styles.css */
-
-#sound-controls {
-    position: fixed; /* Fixed position relative to the viewport */
-    top: 15px;
-    right: 15px;
-    z-index: 1000; /* Ensure it's on top of other content */
-    display: flex;
-    align-items: center;
-    background-color: rgba(44, 62, 80, 0.7); /* Semi-transparent background like game container */
-    padding: 8px 12px;
-    border-radius: 25px; /* Pill shape */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-.sound-control-button {
-    background: none;
-    border: none;
-    color: #ecf0f1; /* Light color for the icon */
-    font-size: 1.4em; /* Adjust emoji size */
-    cursor: pointer;
-    padding: 0 8px; /* Spacing around button */
-    transition: transform 0.2s ease;
-}
-
-.sound-control-button:hover {
-    transform: scale(1.1);
-}
-
-.sound-control-slider {
-    width: 80px; /* Adjust width of the slider */
-    height: 5px; /* Adjust height of the slider track for some browsers */
-    cursor: pointer;
-    /* Basic styling, more advanced styling for range inputs is browser-specific */
-    margin-left: 8px; /* Space between mute button and slider */
-    accent-color: #e74c3c; /* Color for the slider thumb/track on supporting browsers */
-}
-
+/* styles.css - Reverted State */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    /* background-color: #3a4c5e; /* Fallback color */
     color: #ecf0f1; 
     margin: 0;
-    /* padding: 20px; /* We might adjust this or move it to game-container */
     display: flex;
     justify-content: center;
     align-items: flex-start; 
     min-height: 100vh;
     box-sizing: border-box;
-
-    /* --- New Background Image Styles --- */
-    background-image: url('FactorCastBG.png');
-    background-size: cover; /* Cover the entire viewport */
-    background-position: center center; /* Center the image */
+    background-image: url('FactorCastBG.png'); /* Corrected path */
+    background-size: cover; 
+    background-position: center center; 
     background-repeat: no-repeat;
-    background-attachment: fixed; /* Keep background fixed during scroll */
-    /* Fallback color if image fails to load or while it's loading */
+    background-attachment: fixed; 
     background-color: #2c3e50; 
 }
 
 #game-container {
-    /* background-color: #2c3e50; /* OLD Opaque color */
-    background-color: rgba(44, 62, 80, 0.65); /* NEW: Slate gray with 65% opacity */
-    padding: 20px; /* Padding inside the container */
+    background-color: rgba(44, 62, 80, 0.65); 
+    padding: 20px;
     border-radius: 10px;
     box-shadow: 0 5px 20px rgba(0,0,0,0.3); 
     width: 90%;
     max-width: 800px;
     text-align: center;
-    margin-top: 20px; /* Add some margin at the top if body padding was removed */
-    margin-bottom: 20px; /* Add some margin at the bottom */
+    margin-top: 20px; 
+    margin-bottom: 20px; 
 }
 
-/* --- Title Styling & Animation on Correct Answer --- */
-@keyframes titleEpicPulse {
-    0% { /* Start normal */
-        background-image: none;
-        color: #ffffff;
-        -webkit-background-clip: initial;
-        background-clip: initial;
-        text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-    }
-    25%, 75% { /* Go to EPIC and hold */
-        background-image: linear-gradient(to bottom, #ff8c00, #ffa500, #ffd700, #fffacd, #ffffff);
-        color: transparent;
-        -webkit-background-clip: text;
-        background-clip: text;
-        text-shadow: 
-            0 0 5px #fff,
-            0 0 10px #fff,
-            0 0 15px #fff,
-            0 0 20px #ffd700,
-            0 0 30px #ff8c00,
-            0 0 40px #ff8c00;
-    }
-    100% { /* Return to normal */
-        background-image: none;
-        color: #ffffff;
-        -webkit-background-clip: initial;
-        background-clip: initial;
-        text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-    }
+@keyframes titleEpicPulse { /* Keep this animation */
+    0% { background-image: none; color: #ffffff; -webkit-background-clip: initial; background-clip: initial; text-shadow: 0 0 8px rgba(255, 255, 255, 0.3); }
+    25%, 75% { background-image: linear-gradient(to bottom, #ff8c00, #ffa500, #ffd700, #fffacd, #ffffff); color: transparent; -webkit-background-clip: text; background-clip: text; text-shadow: 0 0 5px #fff,0 0 10px #fff,0 0 15px #fff,0 0 20px #ffd700,0 0 30px #ff8c00,0 0 40px #ff8c00; }
+    100% { background-image: none; color: #ffffff; -webkit-background-clip: initial; background-clip: initial; text-shadow: 0 0 8px rgba(255, 255, 255, 0.3); }
 }
 
-main#main-content > h1 { /* Targets h1 directly inside main-content */
-    font-size: 2.5em; /* Maybe a bit smaller if it's at the very bottom */
+/* Title at the bottom of main content */
+main#main-content > h1 {
+    font-size: 2.5em; 
     font-weight: 700;
-    margin-top: 30px; /* Space above the title */
-    margin-bottom: 20px; /* Space below the title */
-    text-align: center; /* Ensure it's centered */
-    
-    /* Default "Normal" Look */
-    background-image: none;
-    color: #ffffff;
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3); /* Subtle white glow */
-    
-    transition: color 0.3s ease, text-shadow 0.3s ease; 
-}
-
-/* Class to trigger the epic pulse animation - TARGETS THE NEW SELECTOR */
-main#main-content > h1.title-epic-pulse {
-    animation-name: titleEpicPulse; /* Uses the same @keyframes titleEpicPulse */
-    animation-duration: 1.5s;
-    animation-timing-function: ease-in-out;
-}
-/*
-#game-header h1 {
-    font-size: 3.5em;
-    font-weight: 700;
-    margin-top: 10px;
-    margin-bottom: 20px;
-    
-
+    margin-top: 30px; 
+    margin-bottom: 20px; 
+    text-align: center; 
     background-image: none;
     color: #ffffff;
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-    
     transition: color 0.3s ease, text-shadow 0.3s ease; 
 }
-
-#game-header h1.title-epic-pulse {
+main#main-content > h1.title-epic-pulse {
     animation-name: titleEpicPulse;
-    animation-duration: 1.5s;   
+    animation-duration: 1.5s;
     animation-timing-function: ease-in-out;
 }
-*/
 
-
-#player-stats {
-    margin-bottom: 20px;
-    font-size: 0.9em;
-    color: #bdc3c7; 
-}
+#player-stats { margin-bottom: 20px; font-size: 0.9em; color: #bdc3c7; }
 
 .display-area {
-    /* background-color: #34495e; /* OLD Opaque color */
-    background-color: rgba(52, 73, 94, 0.55); /* NEW: Darker slate with 55% opacity */
-    border: 1px solid rgba(74, 96, 117, 0.7); /* Border can also be semi-transparent */
-    padding: 15px;
-    margin-bottom: 15px;
-    border-radius: 8px; 
-    min-height: 50px;
-    text-align: left;
-    overflow-wrap: break-word;
+    background-color: rgba(52, 73, 94, 0.55); 
+    border: 1px solid rgba(74, 96, 117, 0.7); 
+    padding: 15px; margin-bottom: 15px; border-radius: 8px; 
+    min-height: 50px; text-align: left; overflow-wrap: break-word;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); 
 }
-
-#problem-area {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #f1c40f;
-    text-align: center;
-    padding: 20px; 
-}
-
+#problem-area { font-size: 1.2em; font-weight: bold; color: #f1c40f; text-align: center; padding: 20px; }
 #step-instruction-area {
-    font-size: 1.1em;
-    font-weight: bold; 
-    color: #f1c40f; 
-    text-align: center;
-    margin-bottom: 10px; 
-    padding: 5px 15px; 
-    border: none; 
-    background-color: transparent; 
-    box-shadow: none; 
+    font-size: 1.1em; font-weight: bold; color: #f1c40f; 
+    text-align: center; margin-bottom: 10px; padding: 5px 15px; 
+    border: none; background-color: transparent; box-shadow: none; 
 }
-
-
-#input-area {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    align-items: center; 
-}
-
+#input-area { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
 #answer-input {
-    flex-grow: 1;
-    padding: 12px 15px; 
-    border-radius: 25px; 
-    border: 1px solid #7f8c8d;
-    background-color: #ecf0f1;
-    color: #2c3e50;
-    font-size: 1em;
-    outline: none;
-    transition: box-shadow 0.3s ease;
+    flex-grow: 1; padding: 12px 15px; border-radius: 25px; 
+    border: 1px solid #7f8c8d; background-color: #ecf0f1; color: #2c3e50;
+    font-size: 1em; outline: none; transition: box-shadow 0.3s ease;
 }
+#answer-input:focus { box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.5); border-color: #e74c3c; }
 
-#answer-input:focus {
-    box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.5); 
-    border-color: #e74c3c;
+.action-button { /* ... (pill button styles as before) ... */
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 12px 30px; border-radius: 50px; border: none;
+    font-size: 1em; font-weight: 600; cursor: pointer;
+    transition: all 0.2s ease-in-out; outline: none; text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); margin: 5px;
+    background-color: #c0392b; color: white;
 }
+.action-button:hover { background-color: #e74c3c; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(231, 76, 60, 0.3); }
+.action-button:active { transform: translateY(0px); box-shadow: 0 2px 5px rgba(231, 76, 60, 0.2); }
 
-.action-button {
-    display: inline-flex; 
-    align-items: center;
-    justify-content: center;
-    padding: 12px 30px; 
-    border-radius: 50px; 
-    border: none;
-    font-size: 1em;
-    font-weight: 600; 
-    cursor: pointer;
-    transition: all 0.2s ease-in-out; 
-    outline: none;
-    text-decoration: none;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    margin: 5px;
-}
+#submit-answer-btn { background-color: #27ae60; color: white; padding: 12px 25px; }
+#submit-answer-btn:hover { background-color: #2ecc71; box-shadow: 0 6px 12px rgba(39, 174, 96, 0.3); }
+#submit-answer-btn:active { box-shadow: 0 2px 5px rgba(39, 174, 96, 0.2); }
 
-.action-button { 
-    background-color: #c0392b; 
-    color: white;
-}
+#action-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.hidden { display: none !important; }
 
-.action-button:hover {
-    background-color: #e74c3c; 
-    transform: translateY(-2px); 
-    box-shadow: 0 6px 12px rgba(231, 76, 60, 0.3); 
-}
+#spell-display-area .spell-card { /* ... (as before) ... */ }
+#spell-display-area .spell-card:hover { /* ... (as before) ... */ }
+#spell-display-area .spell-card .emoji-art { /* ... (as before) ... */ }
+#spell-display-area .spell-card .spell-name { /* ... (as before) ... */ }
+#spell-display-area .spell-card .spell-cost { /* ... (as before) ... */ }
 
-.action-button:active {
-    transform: translateY(0px); 
-    box-shadow: 0 2px 5px rgba(231, 76, 60, 0.2);
-}
+.feedback-correct { color: #2ecc71; font-weight: bold; }
+.feedback-incorrect { color: #e74c3c; font-weight: bold; }
+.train-new-skill-btn { border: 2px solid #f1c40f; background-color: #d35400; }
+.train-new-skill-btn:hover { background-color: #e67e22; }
 
-#submit-answer-btn { 
-    background-color: #27ae60; 
-    color: white;
-    padding: 12px 25px; 
+/* Sound Controls Styling - Keep this */
+#sound-controls {
+    position: fixed; top: 15px; right: 15px; z-index: 1000; display: flex;
+    align-items: center; background-color: rgba(44, 62, 80, 0.7);
+    padding: 8px 12px; border-radius: 25px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
-
-#submit-answer-btn:hover {
-    background-color: #2ecc71; 
-    box-shadow: 0 6px 12px rgba(39, 174, 96, 0.3);
+.sound-control-button {
+    background: none; border: none; color: #ecf0f1; font-size: 1.4em;
+    cursor: pointer; padding: 0 8px; transition: transform 0.2s ease;
 }
-
-#submit-answer-btn:active {
-    box-shadow: 0 2px 5px rgba(39, 174, 96, 0.2);
-}
-
-#action-buttons {
-    display: flex;
-    flex-wrap: wrap; 
-    justify-content: center;
-    gap: 10px; 
-    margin-bottom: 20px;
-}
-
-.hidden {
-    display: none !important;
-}
-
-#spell-display-area .spell-card {
-    display: inline-block;
-    border: 2px solid #f1c40f;
-    border-radius: 10px;
-    padding: 10px;
-    margin: 5px;
-    background-color: #2c3e50;
-    cursor: pointer;
-    text-align: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-#spell-display-area .spell-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 10px rgba(241, 196, 15, 0.3);
-}
-
-#spell-display-area .spell-card .emoji-art {
-    font-size: 4.5em; 
-    display: block;
-    margin-bottom: 5px;
-}
-
-#spell-display-area .spell-card .spell-name {
-    font-weight: bold;
-    font-size: 0.9em;
-}
-#spell-display-area .spell-card .spell-cost {
-    font-size: 0.8em;
-    color: #bdc3c7;
-}
-
-.feedback-correct {
-    color: #2ecc71; 
-    font-weight: bold;
-}
-.feedback-incorrect {
-    color: #e74c3c; 
-    font-weight: bold;
-}
-
-.train-new-skill-btn {
-    border: 2px solid #f1c40f; 
-    background-color: #d35400; 
-}
-.train-new-skill-btn:hover {
-    background-color: #e67e22; 
+.sound-control-button:hover { transform: scale(1.1); }
+.sound-control-slider {
+    width: 80px; height: 5px; cursor: pointer; margin-left: 8px;
+    accent-color: #e74c3c;
 }
