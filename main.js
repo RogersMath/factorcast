@@ -1,152 +1,113 @@
 // main.js
 
 // --- DOM Element References ---
-const storyDisplay = qs('#story-display');
+const storyDisplay = qs('#story-display'); /* ... (all other consts as before) ... */
 const problemArea = qs('#problem-area');
 const stepInstructionArea = qs('#step-instruction-area');
 const answerInput = qs('#answer-input');
 const submitAnswerBtn = qs('#submit-answer-btn');
 const feedbackArea = qs('#feedback-area');
 const gameTitle = qs('main#main-content > h1');
-const backgroundMusic = qs('#background-music');
-const sfxCorrectStep = qs('#sfx-correct-step');
-const sfxSuccessSolve = qs('#sfx-success-solve');
-const muteBtn = qs('#mute-btn');
-const volumeSlider = qs('#volume-slider');
+const backgroundMusic = qs('#background-music'); // For checking mute status
+const volumeSlider = qs('#volume-slider'); // For SFX volume
+const sfxCorrectStep = qs('#sfx-correct-step'); // Not directly used, playSoundEffectById takes ID
+const sfxSuccessSolve = qs('#sfx-success-solve'); // Not directly used
 
-const labBtn = qs('#lab-btn');
+const labBtn = qs('#lab-btn'); /* ... */
 const shopBtn = qs('#shop-btn');
 const exploreBtn = qs('#explore-btn');
 const spellbookBtn = qs('#spellbook-btn');
 const labOptionsArea = qs('#lab-options-area');
 const spellDisplayArea = qs('#spell-display-area');
-const statHp = qs('#stat-hp');
+const statHp = qs('#stat-hp'); /* ... */
 const statMp = qs('#stat-mp');
 const statGold = qs('#stat-gold');
 const statSkill = qs('#stat-skill');
 
 // --- Game State Variables ---
-let player = {};
+let player = {}; /* ... (all other state vars as before) ... */
 let currentProblem = null;
 let currentFactoringStep = 0;
 let expectedFactors = [];
-let musicStarted = false;
+let musicStarted = false; // For background music
 
-const FACTORING_SKILLS = {
-    0: "Novice", 1: "Greatest Common Factor (GCF)", 2: "Difference of Two Squares (DOTS)",
-    3: "Trinomials (a=1)", 4: "Perfect Square Trinomials (PST)",
-    5: "Trinomials (a>1) / Grouping", 6: "Sum of Cubes", 7: "Difference of Cubes"
-};
+const FACTORING_SKILLS = { /* ... */ };
 const MAX_SKILL_LEVEL = Object.keys(FACTORING_SKILLS).length - 1;
 const DAMAGE_SCALING_FACTOR = 0.75;
 const PROBLEMS_TO_MASTER_SKILL = 5;
 
+// Feedback types (constants)
+const FEEDBACK_TYPE = {
+    PROMPT: 'prompt', // Neutral prompt for next step
+    STEP_CORRECT: 'step_correct', // Intermediate step correct
+    PROBLEM_SUCCESS: 'problem_success', // Entire problem solved correctly
+    PROBLEM_FAIL: 'problem_fail', // Entire problem failed
+    NEUTRAL_INFO: 'neutral_info' // General non-gameplay info
+};
+
 // --- Initialization & UI Updates ---
+function initializePlayer() { /* ... (as before) ... */ }
+function updatePlayerStatsUI() { /* ... (as before) ... */ }
+function displayInitialMessage() { /* ... (as before) ... */ }
+function addStoryMessage(message, type = "normal") { /* ... (as before) ... */ }
 
-function setupAudioControls() {
-    if (backgroundMusic && volumeSlider) {
-        backgroundMusic.volume = parseFloat(volumeSlider.value); // Set initial volume
+// NEW/MODIFIED: Centralized feedback function
+function provideUserFeedback(message, feedbackType = FEEDBACK_TYPE.PROMPT) {
+    let targetArea = stepInstructionArea; // Default to step instruction area
+    let clearPreviousFeedback = true;
+    let addClass = '';
+
+    switch (feedbackType) {
+        case FEEDBACK_TYPE.PROMPT:
+            // Message displayed in stepInstructionArea
+            break;
+        case FEEDBACK_TYPE.STEP_CORRECT:
+            playSoundEffectById('sfx-correct-step');
+            // Message displayed in stepInstructionArea
+            break;
+        case FEEDBACK_TYPE.PROBLEM_SUCCESS:
+            playSoundEffectById('sfx-success-solve');
+            targetArea = feedbackArea; // Final success goes to main feedback area
+            addClass = 'feedback-correct';
+            break;
+        case FEEDBACK_TYPE.PROBLEM_FAIL:
+            targetArea = feedbackArea; // Final fail goes to main feedback area
+            addClass = 'feedback-incorrect';
+            // Optionally play a "fail" sound effect here if you add one
+            break;
+        case FEEDBACK_TYPE.NEUTRAL_INFO: // For things like "Please enter an answer"
+             targetArea = stepInstructionArea; // Or feedbackArea if preferred
+             clearPreviousFeedback = false; // Don't clear if it's a quick prompt
+            break;
     }
-    // Mute button icon update based on initial muted state (optional, default is unmuted)
-    if (backgroundMusic && backgroundMusic.muted) {
-        muteBtn.textContent = '🔇'; // Muted Speaker Emoji
-    } else if (muteBtn) { // ensure muteBtn exists
-        muteBtn.textContent = '🔊';
+
+    if (clearPreviousFeedback && targetArea === feedbackArea) {
+        hideElement(stepInstructionArea); // Hide step instruction if final feedback is shown
+    } else if (clearPreviousFeedback && targetArea === stepInstructionArea) {
+        hideElement(feedbackArea); // Hide final feedback if step instruction is shown
     }
+    
+    targetArea.textContent = message;
+    targetArea.className = 'display-area'; // Reset classes before adding new one
+    if (addClass) targetArea.classList.add(addClass);
+    showElement(targetArea);
 }
 
-function initializePlayer() {
-    player = {
-        name: "Arithmancer", hp: 50, maxHp: 50, mp: 30, maxMp: 30, gold: 20, skillLevel: 0,
-        spellbook: [{ ...SPELL_TEMPLATES["gcf_spark"] }], inventory: { "healing_potion": 1 },
-        stats: { problemsAttempted: 0, problemsCorrect: 0, problemsIncorrect: 0 },
-        trainingProgress: { skillKeyInProgress: null, correctStreak: 0, targetStreak: PROBLEMS_TO_MASTER_SKILL }
-    };
-}
-function playSoundEffect(audioElement) {
-    if (audioElement && !backgroundMusic.muted) { // Only play SFX if main music isn't globally muted
-        audioElement.currentTime = 0; // Rewind to start in case it's already playing
-        audioElement.volume = parseFloat(volumeSlider.value) * 0.8; // SFX at 80% of music volume
-        audioElement.play().catch(error => console.warn("SFX play prevented:", error));
-    }
-}
-function updatePlayerStatsUI() {
-    if (!player || Object.keys(player).length === 0) return;
-    updateText('#stat-hp', `HP: ${player.hp}/${player.maxHp}`);
-    updateText('#stat-mp', `MP: ${player.mp}/${player.maxMp}`);
-    updateText('#stat-gold', `Gold: ${player.gold}`);
-    updateText('#stat-skill', `Skill: ${FACTORING_SKILLS[player.skillLevel]}`);
-}
-function displayInitialMessage() {
-    storyDisplay.innerHTML = `<p>Welcome, ${player.name}! The land of Algebraria is troubled by a Great Discontinuity. Only by mastering the ancient art of Factoring can you hope to restore balance. Your journey begins...</p>`;
-}
-function addStoryMessage(message, type = "normal") {
-    const p = document.createElement('p'); p.textContent = message;
-    if(type !== "normal") p.classList.add(type);
-    storyDisplay.appendChild(p); storyDisplay.scrollTop = storyDisplay.scrollHeight;
-}
-function displayFinalFeedback(message, isCorrect) {
-    feedbackArea.textContent = message; feedbackArea.className = 'display-area';
-    if (isCorrect === true) feedbackArea.classList.add('feedback-correct');
-    else if (isCorrect === false) feedbackArea.classList.add('feedback-incorrect');
-    showElement(feedbackArea);
-}
-function displayStepInstruction(instruction) {
-    if (instruction) { stepInstructionArea.textContent = instruction; showElement(stepInstructionArea); } 
-    else { hideElement(stepInstructionArea); }
-}
+
 function clearProblemArea() {
-    problemArea.innerHTML = ""; hideElement(problemArea); displayStepInstruction(null);
-    hideElement(qs('#input-area')); answerInput.value = ""; hideElement(feedbackArea);
+    problemArea.innerHTML = ""; hideElement(problemArea);
+    provideUserFeedback("", FEEDBACK_TYPE.PROMPT); // Clear step instruction area implicitly
+    hideElement(stepInstructionArea); // Explicitly hide
+    hideElement(feedbackArea);    // Explicitly hide
+    hideElement(qs('#input-area')); answerInput.value = "";
     currentProblem = null; currentFactoringStep = 0; expectedFactors = [];
 }
-function enterLaboratory() {
-    addStoryMessage("You enter the Aetherium Laboratory. Ancient symbols glow faintly on the walls.");
-    clearProblemArea(); hideElement(spellDisplayArea); showLabOptions();
-}
-function showLabOptions() {
-    labOptionsArea.innerHTML = '<h3>Practice Factoring Skills:</h3>';
-    const nextSkillToLearnLevel = player.skillLevel + 1;
-    for (let i = 1; i <= MAX_SKILL_LEVEL; i++) {
-        const skillKey = i; const skillName = FACTORING_SKILLS[skillKey];
-        const button = document.createElement('button'); button.classList.add('action-button', 'lab-skill-btn');
-        button.dataset.skillKey = skillKey; let buttonText = "";
-        if (skillKey <= player.skillLevel) { buttonText = `Practice: ${skillName}`; } 
-        else if (skillKey === nextSkillToLearnLevel) {
-            buttonText = `Train: ${skillName} (New!)`;
-            if (player.trainingProgress.skillKeyInProgress === skillKey) {
-                buttonText += ` [${player.trainingProgress.correctStreak}/${player.trainingProgress.targetStreak}]`;
-            }
-            button.classList.add('train-new-skill-btn');
-        } else { buttonText = `${skillName} (Locked)`; button.disabled = true; }
-        button.textContent = buttonText; button.addEventListener('click', () => startPractice(skillKey));
-        labOptionsArea.appendChild(button);
-    }
-    showElement(labOptionsArea);
-}
-function startPractice(skillKeyToPractice) {
-    if (skillKeyToPractice > player.skillLevel + 1 && skillKeyToPractice !== player.trainingProgress.skillKeyInProgress) {
-        if(!(player.trainingProgress.skillKeyInProgress === skillKeyToPractice && skillKeyToPractice === player.skillLevel + 1)){
-            addStoryMessage("You are not yet ready to train that skill."); return;
-        }
-    }
-    hideElement(labOptionsArea); clearProblemArea();
-    if (skillKeyToPractice > player.skillLevel) {
-        if (player.trainingProgress.skillKeyInProgress !== skillKeyToPractice) {
-            player.trainingProgress.skillKeyInProgress = skillKeyToPractice; player.trainingProgress.correctStreak = 0;
-            addStoryMessage(`Beginning training for ${FACTORING_SKILLS[skillKeyToPractice]}. You need ${player.trainingProgress.targetStreak} correct problems to master it.`, "info");
-        }
-    } else { player.trainingProgress.skillKeyInProgress = null; }
-    let problemData; let problemTypeForCheck;
-    const difficultyTier = (skillKeyToPractice > player.skillLevel) ? 1 : getRandomInt(1, 2);
-    switch (skillKeyToPractice) {
-        case 1: problemData = generateGCFProblemJS(difficultyTier); problemTypeForCheck = "monomial_gcf"; break;
-        case 2: problemData = generateDOTSProblemJS(difficultyTier); problemTypeForCheck = "dots"; break;
-        case 3: problemData = generateTrinomialA1ProblemJS(difficultyTier); problemTypeForCheck = "trinomial_a1"; break;
-        default: addStoryMessage(`Problem generation for ${FACTORING_SKILLS[skillKeyToPractice]} is not ready yet.`); showLabOptions(); return;
-    }
+function enterLaboratory() { /* ... (as before) ... */ }
+function showLabOptions() { /* ... (as before) ... */ }
+function startPractice(skillKeyToPractice) { /* ... (as before, using provideUserFeedback for initial prompt) ... */
+    // ... (logic to choose problem) ...
     if (problemData && problemData.problemString) {
-        currentProblem = { problemString: problemData.problemString, type: problemTypeForCheck, details: problemData.details, skillKey: skillKeyToPractice };
+        // ... (set currentProblem) ...
         problemArea.innerHTML = `Factor: ${currentProblem.problemString}`; showElement(problemArea);
         showElement(qs('#input-area')); answerInput.value = ""; answerInput.focus();
         let instruction = "";
@@ -158,187 +119,24 @@ function startPractice(skillKeyToPractice) {
         if (player.trainingProgress.skillKeyInProgress === skillKeyToPractice && skillKeyToPractice > player.skillLevel) {
             instruction = `Training (${player.trainingProgress.correctStreak}/${player.trainingProgress.targetStreak}): ${instruction}`;
         }
-        displayStepInstruction(instruction);
-    } else { addStoryMessage("Failed to generate a problem. Please try again."); showLabOptions(); }
+        provideUserFeedback(instruction, FEEDBACK_TYPE.PROMPT); // Use new feedback function
+    } else { /* ... */ }
 }
 
-// --- REFACTORED Problem Generation ---
-
-// Snippet for main.js - REPLACE the entire generateGCFProblemJS function
-
-function generateGCFProblemJS(difficultyTier = 1) {
-    const v1 = getRandomVariable();
-    let problemString, finalNumericGCF, variableGCF = "", remainingExpr;
-
-    const type = getRandomInt(1, 3);
-
-    if (type === 1) { // GCF is purely numerical: e.g., 18x + 12y -> 6(3x + 2y)
-        let n1 = getRandomInt(1, 6) * getRandomInt(2, 4); // Create numbers with likely common factors
-        let n2 = getRandomInt(1, 6) * getRandomInt(2, 4);
-        // Ensure n1 and n2 are not trivially 1 or the same after multiplication if they are small
-        if (n1 === n2 && n1 < 10) n2 = n1 + getRandomInt(2,6); // Make them different
-        while (calculateGCD(n1, n2) <= 1 && (n1 > 1 || n2 > 1) ) { // Ensure GCF > 1 if possible
-             n1 = getRandomInt(1, 6) * getRandomInt(2, 4);
-             n2 = getRandomInt(1, 6) * getRandomInt(2, 4);
-             if (n1 === n2 && n1 < 10) n2 = n1 + getRandomInt(2,6);
-        }
-        if (calculateGCD(n1,n2) === 0 && (n1!==0 || n2!==0)) { // Should not happen if n1,n2 are non-zero usually
-             finalNumericGCF = (n1!==0) ? Math.abs(n1) : Math.abs(n2); // if one is 0, gcf is the other
-        } else {
-            finalNumericGCF = calculateGCD(n1, n2);
-        }
-
-
-        const c1 = getRandomNonZeroInt(1, 3); // Multiplier for v1 term inside parenthesis
-        const c2 = getRandomNonZeroInt(1, 3); // Multiplier for v2 term inside parenthesis
-        const v2 = getRandomVariable([v1]);
-
-        const term1Coeff = finalNumericGCF * c1;
-        const term2Coeff = finalNumericGCF * c2;
-        // Recalculate true GCF of final coefficients
-        finalNumericGCF = calculateGCD(term1Coeff, term2Coeff);
-
-
-        const term1Display = formatTermForDisplay(term1Coeff, v1);
-        const term2Display = formatTermForDisplay(term2Coeff, v2);
-        problemString = formatExpressionForDisplay([term1Display, term2Display]);
-        
-        const gcfForProblem = finalNumericGCF.toString();
-        
-        const remTerm1Coeff = term1Coeff / finalNumericGCF;
-        const remTerm2Coeff = term2Coeff / finalNumericGCF;
-        const remTerm1Display = formatTermForDisplay(remTerm1Coeff, v1);
-        const remTerm2Display = formatTermForDisplay(remTerm2Coeff, v2);
-        remainingExpr = `(${formatExpressionForDisplay([remTerm1Display, remTerm2Display])})`;
-        
-        return { problemString, details: { gcf: cleanInput(gcfForProblem), remainingExpr: cleanInput(remainingExpr) } };
-
-    } else if (type === 2) { // GCF includes a variable: e.g., 12x^2 + 18x -> 6x(2x + 3)
-        let n1_base = getRandomInt(1, 4);
-        let n2_base = getRandomInt(1, 4);
-        let common_mult = getRandomInt(1,4); // Can be 1 if no extra common numeric factor desired
-
-        let term1Coeff = n1_base * common_mult;
-        let term2Coeff = n2_base * common_mult;
-
-        // Ensure coefficients are not both 1 if possible, to make GCF interesting
-        if (term1Coeff === 1 && term2Coeff === 1) {
-            term1Coeff = getRandomInt(2,5); // Make at least one larger
-        }
-        
-        finalNumericGCF = calculateGCD(term1Coeff, term2Coeff);
-        variableGCF = v1; // The common variable is v1
-
-        const term1Display = formatTermForDisplay(term1Coeff, v1, "<sup>2</sup>");
-        const term2Display = formatTermForDisplay(term2Coeff, v1);
-        problemString = formatExpressionForDisplay([term1Display, term2Display]);
-
-        const gcfForProblem = formatTermForDisplay(finalNumericGCF, variableGCF);
-        
-        const remTerm1Coeff = term1Coeff / finalNumericGCF;
-        const remTerm2Coeff = term2Coeff / finalNumericGCF;
-
-        const remTerm1Display = formatTermForDisplay(remTerm1Coeff, v1); // v1^2 / v1 = v1
-        const remTerm2Display = formatTermForDisplay(remTerm2Coeff);       // v1 / v1 = constant
-        remainingExpr = `(${formatExpressionForDisplay([remTerm1Display, remTerm2Display])})`;
-
-        return { problemString, details: { gcf: cleanInput(gcfForProblem), remainingExpr: cleanInput(remainingExpr) } };
-
-    } else { // Numerical GCF with a constant term: e.g., 18x + 12 -> 6(3x + 2)
-        let n1_base = getRandomInt(1, 6); 
-        let n2_base = getRandomInt(1, 6); 
-        let common_mult = getRandomInt(2,4); // Ensure a common factor > 1
-
-        let term1Coeff = n1_base * common_mult;
-        let term2Num = n2_base * common_mult;
-
-        // Recalculate true GCF of final coefficients
-        finalNumericGCF = calculateGCD(term1Coeff, term2Num);
-
-        const term1Display = formatTermForDisplay(term1Coeff, v1);
-        const term2Display = formatTermForDisplay(term2Num);
-        problemString = formatExpressionForDisplay([term1Display, term2Display]);
-        
-        const gcfForProblem = finalNumericGCF.toString();
-        
-        const remTerm1Coeff = term1Coeff / finalNumericGCF;
-        const remTerm2Num = term2Num / finalNumericGCF;
-
-        const remTerm1Display = formatTermForDisplay(remTerm1Coeff, v1);
-        const remTerm2Display = formatTermForDisplay(remTerm2Num);
-        remainingExpr = `(${formatExpressionForDisplay([remTerm1Display, remTerm2Display])})`;
-        
-        return { problemString, details: { gcf: cleanInput(gcfForProblem), remainingExpr: cleanInput(remainingExpr) } };
-    }
-}
-
-
-function generateDOTSProblemJS(difficultyTier = 1) {
-    const v = getRandomVariable();
-    let problemString, factor1Str, factor2Str;
-
-    if (difficultyTier > 1 && Math.random() < 0.4) { // k^2*v^2 - m^2
-        const k = getRandomInt(2, 5);
-        const m = getRandomNonZeroInt(1, 7);
-        
-        const term1Display = formatTermForDisplay(k * k, v, "<sup>2</sup>");
-        const term2Display = formatTermForDisplay(- (m * m)); 
-        problemString = formatExpressionForDisplay([term1Display, term2Display]);
-
-        const factorTermK = formatTermForDisplay(k, v);
-        const factorTermM = m.toString();
-        factor1Str = `(${factorTermK}-${factorTermM})`;
-        factor2Str = `(${factorTermK}+${factorTermM})`;
-
-    } else { // v^2 - a^2
-        const a = getRandomNonZeroInt(2, 10);
-        
-        const term1Display = formatTermForDisplay(1, v, "<sup>2</sup>");
-        const term2Display = formatTermForDisplay(- (a * a));
-        problemString = formatExpressionForDisplay([term1Display, term2Display]);
-
-        factor1Str = `(${v}-${a})`;
-        factor2Str = `(${v}+${a})`;
-    }
-    return { problemString, details: { factors: [cleanInput(factor1Str), cleanInput(factor2Str)].sort() } };
-}
-
-
-function generateTrinomialA1ProblemJS(difficultyTier = 1) {
-    const v = getRandomVariable();
-    let p = getRandomNonZeroInt(-7, 7);
-    let q = getRandomNonZeroInt(-7, 7);
-
-    while (p + q === 0) { 
-        q = getRandomNonZeroInt(-7, 7);
-        if (p === -q && q !== 0) q = getRandomNonZeroInt(-7,7); 
-        else if (q === 0) q = getRandomNonZeroInt(-7,7); // ensure q is not zero if p makes b zero
-    }
-    
-    const b = p + q;
-    const c = p * q;
-
-    const term1Display = formatTermForDisplay(1, v, "<sup>2</sup>"); 
-    const term2Display = formatTermForDisplay(b, v);                
-    const term3Display = formatTermForDisplay(c);                   
-    problemString = formatExpressionForDisplay([term1Display, term2Display, term3Display].filter(t => t !== "" || c === 0)); // Allow "0" if c is 0
-
-
-    const factor1Str = `(${v}${p > 0 ? '+' : ''}${p})`.replace('+-', '-');
-    const factor2Str = `(${v}${q > 0 ? '+' : ''}${q})`.replace('+-', '-');
-    
-    return { problemString, details: { factors: [cleanInput(factor1Str), cleanInput(factor2Str)].sort() } };
-}
+// --- REFACTORED Problem Generation (ensure these are the latest from previous response) ---
+function generateGCFProblemJS(difficultyTier = 1) { /* ... (as refactored before) ... */ }
+function generateDOTSProblemJS(difficultyTier = 1) { /* ... (as refactored before) ... */ }
+function generateTrinomialA1ProblemJS(difficultyTier = 1) { /* ... (as refactored before) ... */ }
 
 // --- Answer Checking ---
 function handleSubmitAnswer() {
     if (!currentProblem) {
-        displayFinalFeedback("No active problem.", false);
+        provideUserFeedback("No active problem.", FEEDBACK_TYPE.PROBLEM_FAIL); // Or NEUTRAL_INFO
         return;
     }
     const userAnswer = answerInput.value;
     if (!userAnswer.trim()) {
-        displayStepInstruction("Please enter an answer.");
+        provideUserFeedback("Please enter an answer.", FEEDBACK_TYPE.NEUTRAL_INFO);
         return;
     }
 
@@ -346,188 +144,152 @@ function handleSubmitAnswer() {
     const cleanedUserAnswer = cleanInput(userAnswer);
     let correctStep = false;
     let problemFullySolved = false;
-    let stepInstructionMsg = "";
-    let finalFeedbackMsg = "";
+    let feedbackMsg = "";
+    let feedbackType = FEEDBACK_TYPE.PROMPT; // Default for next step
 
     if (currentProblem.type === "monomial_gcf") {
         if (currentFactoringStep === 1) {
             const correctGCF = currentProblem.details.gcf;
             if (cleanedUserAnswer === correctGCF) {
-                stepInstructionMsg = "Correct GCF! Now enter the remaining expression (e.g., (x+y)):";
-                currentFactoringStep = 2; correctStep = true;
+                feedbackMsg = "Correct GCF! Now enter the remaining expression (e.g., (x+y)):";
+                currentFactoringStep = 2; correctStep = true; feedbackType = FEEDBACK_TYPE.STEP_CORRECT;
             } else {
-                finalFeedbackMsg = `Incorrect GCF. Expected: ${currentProblem.details.gcf}.`;
-                problemFullySolved = true; correctStep = false;
+                feedbackMsg = `Incorrect GCF. Expected: ${currentProblem.details.gcf}.`;
+                problemFullySolved = true; correctStep = false; feedbackType = FEEDBACK_TYPE.PROBLEM_FAIL;
             }
         } else if (currentFactoringStep === 2) {
             const correctRemaining = currentProblem.details.remainingExpr;
             if (cleanedUserAnswer === correctRemaining) {
-                finalFeedbackMsg = "Factoring complete and correct!";
-                correctStep = true; problemFullySolved = true;
+                feedbackMsg = "Factoring complete and correct!";
+                correctStep = true; problemFullySolved = true; feedbackType = FEEDBACK_TYPE.PROBLEM_SUCCESS;
             } else {
-                finalFeedbackMsg = `Incorrect remaining expression. Expected: ${currentProblem.details.remainingExpr}.`;
-                problemFullySolved = true; correctStep = false;
+                feedbackMsg = `Incorrect remaining expression. Expected: ${currentProblem.details.remainingExpr}.`;
+                problemFullySolved = true; correctStep = false; feedbackType = FEEDBACK_TYPE.PROBLEM_FAIL;
             }
         }
     } else if (["dots", "trinomial_a1"].includes(currentProblem.type)) {
         if (currentFactoringStep === 1) {
             if (expectedFactors.includes(cleanedUserAnswer)) {
-                stepInstructionMsg = "Correct! Enter the second factor:";
+                feedbackMsg = "Correct! Enter the second factor:";
                 expectedFactors.splice(expectedFactors.indexOf(cleanedUserAnswer), 1);
-                currentFactoringStep = 2; correctStep = true;
+                currentFactoringStep = 2; correctStep = true; feedbackType = FEEDBACK_TYPE.STEP_CORRECT;
             } else {
-                finalFeedbackMsg = `Incorrect first factor. Expected one of: ${currentProblem.details.factors.join(' or ')}.`;
-                problemFullySolved = true; correctStep = false;
+                feedbackMsg = `Incorrect first factor. Expected one of: ${currentProblem.details.factors.join(' or ')}.`;
+                problemFullySolved = true; correctStep = false; feedbackType = FEEDBACK_TYPE.PROBLEM_FAIL;
             }
         } else if (currentFactoringStep === 2) {
             if (expectedFactors.includes(cleanedUserAnswer)) {
-                finalFeedbackMsg = "Factoring complete and correct!";
-                correctStep = true; problemFullySolved = true;
+                feedbackMsg = "Factoring complete and correct!";
+                correctStep = true; problemFullySolved = true; feedbackType = FEEDBACK_TYPE.PROBLEM_SUCCESS;
             } else {
                 const expectedFactor2 = expectedFactors.length > 0 ? expectedFactors[0] : "the other factor";
-                finalFeedbackMsg = `Incorrect second factor. Expected: ${expectedFactor2}.`;
-                problemFullySolved = true; correctStep = false;
+                feedbackMsg = `Incorrect second factor. Expected: ${expectedFactor2}.`;
+                problemFullySolved = true; correctStep = false; feedbackType = FEEDBACK_TYPE.PROBLEM_FAIL;
             }
         }
     }
 
-    if (correctStep && !problemFullySolved) {
-        answerInput.value = ""; answerInput.focus(); let prefix = "";
-        if (player.trainingProgress.skillKeyInProgress === currentProblem.skillKey && currentProblem.skillKey > player.skillLevel) {
-            prefix = `Training (${player.trainingProgress.correctStreak}/${player.trainingProgress.targetStreak}): `;
-        }
-        displayStepInstruction(prefix + stepInstructionMsg);
-        return;
+    // Add training prefix if applicable
+    let prefix = "";
+    if (player.trainingProgress.skillKeyInProgress === currentProblem.skillKey && currentProblem.skillKey > player.skillLevel &&
+        (feedbackType === FEEDBACK_TYPE.PROMPT || feedbackType === FEEDBACK_TYPE.STEP_CORRECT) ) { // Only for prompts/intermediate steps
+        prefix = `Training (${player.trainingProgress.correctStreak}/${player.trainingProgress.targetStreak}): `;
+    }
+    provideUserFeedback(prefix + feedbackMsg, feedbackType);
+
+
+    if (correctStep && !problemFullySolved) { // Intermediate correct step, already handled by provideUserFeedback
+        answerInput.value = ""; answerInput.focus();
+        return; // Wait for next input
     }
 
-    displayFinalFeedback(finalFeedbackMsg, correctStep);
-
-    // Store skillKey before currentProblem is cleared
+    // --- Logic for a fully resolved problem (correct or incorrect at the last step) ---
     const lastProblemSkillKey = currentProblem ? currentProblem.skillKey : null;
 
-
-    if (correctStep) {
+    if (correctStep && problemFullySolved) { // Problem was fully and correctly solved
         player.stats.problemsCorrect++;
         if (gameTitle) {
             gameTitle.classList.add('title-epic-pulse');
             gameTitle.addEventListener('animationend', () => { if (gameTitle) gameTitle.classList.remove('title-epic-pulse'); }, { once: true });
         }
-        if (lastProblemSkillKey && lastProblemSkillKey > player.skillLevel) { // Check lastProblemSkillKey exists
+        if (lastProblemSkillKey && lastProblemSkillKey > player.skillLevel) {
             if (player.trainingProgress.skillKeyInProgress === lastProblemSkillKey) {
                 player.trainingProgress.correctStreak++;
                 if (player.trainingProgress.correctStreak >= player.trainingProgress.targetStreak) {
-                    player.skillLevel = lastProblemSkillKey; // Use lastProblemSkillKey
-                    addStoryMessage(`Mastered! You have achieved ${FACTORING_SKILLS[player.skillLevel]}! Your Arithmancer rank is now: ${FACTORING_SKILLS[player.skillLevel]}.`, "success");
+                    player.skillLevel = lastProblemSkillKey;
+                    addStoryMessage(`Mastered! You have achieved ${FACTORING_SKILLS[player.skillLevel]}! Rank: ${FACTORING_SKILLS[player.skillLevel]}.`, "success");
                     player.trainingProgress.skillKeyInProgress = null; player.trainingProgress.correctStreak = 0;
                     updatePlayerStatsUI();
                 } else {
                      addStoryMessage(`Correct! Streak for ${FACTORING_SKILLS[lastProblemSkillKey]}: ${player.trainingProgress.correctStreak}/${player.trainingProgress.targetStreak}. Keep going!`, "info");
                 }
             }
-        } else {
+        } else { // Practicing an already mastered skill
             const goldReward = getRandomInt(1, 5); player.gold += goldReward;
             addStoryMessage(`You reinforce your knowledge and find ${goldReward} gold dust.`, "info");
             updatePlayerStatsUI();
         }
-    } else { // Incorrect problem
+    } else if ((!correctStep && problemFullySolved) || (correctStep === false && feedbackType === FEEDBACK_TYPE.PROBLEM_FAIL)) { // Problem was incorrect
         player.stats.problemsIncorrect++;
-        if (lastProblemSkillKey && player.trainingProgress.skillKeyInProgress === lastProblemSkillKey && lastProblemSkillKey > player.skillLevel) { // Check lastProblemSkillKey
+        if (lastProblemSkillKey && player.trainingProgress.skillKeyInProgress === lastProblemSkillKey && lastProblemSkillKey > player.skillLevel) {
             addStoryMessage(`Incorrect. Your training streak for ${FACTORING_SKILLS[lastProblemSkillKey]} has been reset.`, "error");
             player.trainingProgress.correctStreak = 0;
         }
     }
 
-    setTimeout(() => {
-        clearProblemArea(); // This sets currentProblem to null
-        if (player.trainingProgress.skillKeyInProgress && 
-            lastProblemSkillKey && 
-            lastProblemSkillKey === player.trainingProgress.skillKeyInProgress && 
-            player.skillLevel < lastProblemSkillKey) {
-            startPractice(player.trainingProgress.skillKeyInProgress);
-        } else {
-            showLabOptions();
-        }
-    }, 2500);
+    if (problemFullySolved) { // Only proceed to next state if problem is done
+        setTimeout(() => {
+            clearProblemArea();
+            if (player.trainingProgress.skillKeyInProgress && 
+                lastProblemSkillKey && 
+                lastProblemSkillKey === player.trainingProgress.skillKeyInProgress && 
+                player.skillLevel < lastProblemSkillKey) {
+                startPractice(player.trainingProgress.skillKeyInProgress);
+            } else {
+                showLabOptions();
+            }
+        }, 2000); // Shortened timeout for quicker flow after feedback
+    }
 }
 
-// --- Event Listeners & Game Start ---
-function setupEventListeners() {
-    labBtn.addEventListener('click', () => {
-        attemptToStartMusic(); // <<< ADD
-        enterLaboratory();
-    });
-    shopBtn.addEventListener('click', () => {
-        attemptToStartMusic(); // <<< ADD
-        addStoryMessage("The Wandering Emporium is closed...", "info"); /* ... */
-    });
-    exploreBtn.addEventListener('click', () => {
-        attemptToStartMusic(); // <<< ADD
-        addStoryMessage("The wilds are vast...", "info"); /* ... */
-    });
-    spellbookBtn.addEventListener('click', () => {
-        attemptToStartMusic(); // <<< ADD
-        addStoryMessage("You consult your spellbook...", "info"); /* ... */ displaySpellbook();
-    });
-    submitAnswerBtn.addEventListener('click', () => {
-         attemptToStartMusic(); // <<< ADD (also on answer submit)
-         handleSubmitAnswer();
-    });
-    answerInput.addEventListener('keypress', function(event) { 
-        if (event.key === 'Enter') {
-            attemptToStartMusic(); // <<< ADD
-            handleSubmitAnswer(); 
-        }
-    });
-
-    // --- New Listeners for Sound Controls ---
-    if (muteBtn && backgroundMusic) {
-        muteBtn.addEventListener('click', () => {
-            backgroundMusic.muted = !backgroundMusic.muted;
-            muteBtn.textContent = backgroundMusic.muted ? '🔇' : '🔊';
-        });
+// --- Audio Controls and Game Start (ensure latest versions) ---
+function setupAudioControls() { /* ... (as before) ... */
+    if (backgroundMusic && volumeSlider) backgroundMusic.volume = parseFloat(volumeSlider.value);
+    if (muteBtn && backgroundMusic) muteBtn.textContent = backgroundMusic.muted ? '🔇' : '🔊';
+}
+function attemptToStartMusic() { /* ... (as before) ... */
+    if (!musicStarted && backgroundMusic) {
+        backgroundMusic.play().then(() => { musicStarted = true; console.log("BG music started."); })
+            .catch(error => console.warn("Music autoplay prevented.", error));
     }
-
+}
+function setupEventListeners() { /* ... (as before, ensure attemptToStartMusic() calls are there) ... */
+    labBtn.addEventListener('click', () => { attemptToStartMusic(); enterLaboratory(); });
+    shopBtn.addEventListener('click', () => { attemptToStartMusic(); addStoryMessage("Shop closed...", "info"); /*...*/ });
+    exploreBtn.addEventListener('click', () => { attemptToStartMusic(); addStoryMessage("Wilds vast...", "info"); /*...*/ });
+    spellbookBtn.addEventListener('click', () => { attemptToStartMusic(); addStoryMessage("Consult spellbook...", "info"); /*...*/ displaySpellbook(); });
+    submitAnswerBtn.addEventListener('click', () => { attemptToStartMusic(); handleSubmitAnswer(); });
+    answerInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { attemptToStartMusic(); handleSubmitAnswer(); } });
+    if (muteBtn && backgroundMusic) {
+        muteBtn.addEventListener('click', () => { backgroundMusic.muted = !backgroundMusic.muted; muteBtn.textContent = backgroundMusic.muted ? '🔇' : '🔊'; });
+    }
     if (volumeSlider && backgroundMusic) {
-        volumeSlider.addEventListener('input', () => {
+        volumeSlider.addEventListener('input', () => { /* ... (volume logic as before) ... */
             backgroundMusic.volume = parseFloat(volumeSlider.value);
-            // If volume is > 0, ensure it's unmuted and icon reflects that
-            if (backgroundMusic.volume > 0 && backgroundMusic.muted) {
-                backgroundMusic.muted = false;
-                if (muteBtn) muteBtn.textContent = '🔊';
-            } else if (backgroundMusic.volume === 0 && !backgroundMusic.muted) {
-                // Optional: if volume set to 0 via slider, also show mute icon
-                if (muteBtn) muteBtn.textContent = '🔇';
+            if (muteBtn) { // Ensure muteBtn exists before trying to update its textContent
+                if (backgroundMusic.volume > 0 && backgroundMusic.muted) {
+                    backgroundMusic.muted = false; muteBtn.textContent = '🔊';
+                } else if (backgroundMusic.volume === 0 && !backgroundMusic.muted) {
+                    muteBtn.textContent = '🔇';
+                } else if (backgroundMusic.volume > 0 && !backgroundMusic.muted) {
+                    muteBtn.textContent = '🔊'; // Ensure it's speaker if unmuted and volume > 0
+                }
             }
         });
     }
 }
-function displaySpellbook() {
-    spellDisplayArea.innerHTML = '<h3>Your Spellbook:</h3>';
-    if (player.spellbook.length === 0) { spellDisplayArea.innerHTML += '<p>Your spellbook is empty.</p>'; } 
-    else {
-        player.spellbook.forEach(spell => {
-            const card = document.createElement('div'); card.classList.add('spell-card');
-            card.innerHTML = `<div class="emoji-art">${spell.emoji}</div><div class="spell-name">${spell.name}</div><div class="spell-cost">MP: ${spell.mpCost}</div><div class="spell-desc" style="font-size:0.8em; color: #ccc;">${spell.description}</div>`;
-            spellDisplayArea.appendChild(card);
-        });
-    }
-    showElement(spellDisplayArea);
-}
-
-function attemptToStartMusic() {
-    if (!musicStarted && backgroundMusic) {
-        backgroundMusic.play().then(() => {
-            musicStarted = true;
-            console.log("Background music started.");
-        }).catch(error => {
-            console.warn("Music autoplay was prevented. User interaction might be needed beyond this.", error);
-            // Browsers often block autoplay until a direct user gesture on the page.
-            // This first click should count, but good to be aware.
-        });
-    }
-}
-
-function initGame() {
+function displaySpellbook() { /* ... (as before) ... */ }
+function initGame() { /* ... (as before) ... */
     initializePlayer(); setupAudioControls(); updatePlayerStatsUI(); displayInitialMessage(); setupEventListeners();
     hideElement(labOptionsArea); hideElement(problemArea); hideElement(qs('#input-area'));
     hideElement(stepInstructionArea); hideElement(feedbackArea); hideElement(spellDisplayArea);
