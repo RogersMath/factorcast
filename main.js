@@ -138,62 +138,112 @@ function startPractice(skillKeyToPractice) {
 
 // --- REFACTORED Problem Generation ---
 
+// Snippet for main.js - REPLACE the entire generateGCFProblemJS function
+
 function generateGCFProblemJS(difficultyTier = 1) {
     const v1 = getRandomVariable();
-    let problemString, gcf, remainingExpr;
+    let problemString, finalNumericGCF, variableGCF = "", remainingExpr;
+
     const type = getRandomInt(1, 3);
 
-    if (type === 1) { // e.g., ac*v1 + bc*v2 -> c(av1+bv2)
-        const commonNum = getRandomInt(2, 7);
-        const c1 = getRandomNonZeroInt(1,3);
-        const c2 = getRandomNonZeroInt(1,3);
+    if (type === 1) { // GCF is purely numerical: e.g., 18x + 12y -> 6(3x + 2y)
+        let n1 = getRandomInt(1, 6) * getRandomInt(2, 4); // Create numbers with likely common factors
+        let n2 = getRandomInt(1, 6) * getRandomInt(2, 4);
+        // Ensure n1 and n2 are not trivially 1 or the same after multiplication if they are small
+        if (n1 === n2 && n1 < 10) n2 = n1 + getRandomInt(2,6); // Make them different
+        while (calculateGCD(n1, n2) <= 1 && (n1 > 1 || n2 > 1) ) { // Ensure GCF > 1 if possible
+             n1 = getRandomInt(1, 6) * getRandomInt(2, 4);
+             n2 = getRandomInt(1, 6) * getRandomInt(2, 4);
+             if (n1 === n2 && n1 < 10) n2 = n1 + getRandomInt(2,6);
+        }
+        if (calculateGCD(n1,n2) === 0 && (n1!==0 || n2!==0)) { // Should not happen if n1,n2 are non-zero usually
+             finalNumericGCF = (n1!==0) ? Math.abs(n1) : Math.abs(n2); // if one is 0, gcf is the other
+        } else {
+            finalNumericGCF = calculateGCD(n1, n2);
+        }
+
+
+        const c1 = getRandomNonZeroInt(1, 3); // Multiplier for v1 term inside parenthesis
+        const c2 = getRandomNonZeroInt(1, 3); // Multiplier for v2 term inside parenthesis
         const v2 = getRandomVariable([v1]);
 
-        const term1Display = formatTermForDisplay(commonNum * c1, v1);
-        const term2Display = formatTermForDisplay(commonNum * c2, v2);
+        const term1Coeff = finalNumericGCF * c1;
+        const term2Coeff = finalNumericGCF * c2;
+        // Recalculate true GCF of final coefficients
+        finalNumericGCF = calculateGCD(term1Coeff, term2Coeff);
+
+
+        const term1Display = formatTermForDisplay(term1Coeff, v1);
+        const term2Display = formatTermForDisplay(term2Coeff, v2);
         problemString = formatExpressionForDisplay([term1Display, term2Display]);
         
-        gcf = commonNum.toString();
-        const remTerm1 = formatTermForDisplay(c1,v1);
-        const remTerm2 = formatTermForDisplay(c2,v2);
-        remainingExpr = `(${formatExpressionForDisplay([remTerm1, remTerm2])})`;
+        const gcfForProblem = finalNumericGCF.toString();
+        
+        const remTerm1Coeff = term1Coeff / finalNumericGCF;
+        const remTerm2Coeff = term2Coeff / finalNumericGCF;
+        const remTerm1Display = formatTermForDisplay(remTerm1Coeff, v1);
+        const remTerm2Display = formatTermForDisplay(remTerm2Coeff, v2);
+        remainingExpr = `(${formatExpressionForDisplay([remTerm1Display, remTerm2Display])})`;
+        
+        return { problemString, details: { gcf: cleanInput(gcfForProblem), remainingExpr: cleanInput(remainingExpr) } };
 
-    } else if (type === 2) { // e.g., ac*v1^2 + bc*v1 -> cv1(av1+b)
-        const commonNum = getRandomInt(1, 4); 
-        const c1 = getRandomNonZeroInt(1, 3); 
-        const c2 = getRandomNonZeroInt(1, 4); 
+    } else if (type === 2) { // GCF includes a variable: e.g., 12x^2 + 18x -> 6x(2x + 3)
+        let n1_base = getRandomInt(1, 4);
+        let n2_base = getRandomInt(1, 4);
+        let common_mult = getRandomInt(1,4); // Can be 1 if no extra common numeric factor desired
 
-        const term1Coeff = commonNum * c1;
-        const term2Coeff = commonNum * c2;
+        let term1Coeff = n1_base * common_mult;
+        let term2Coeff = n2_base * common_mult;
+
+        // Ensure coefficients are not both 1 if possible, to make GCF interesting
+        if (term1Coeff === 1 && term2Coeff === 1) {
+            term1Coeff = getRandomInt(2,5); // Make at least one larger
+        }
+        
+        finalNumericGCF = calculateGCD(term1Coeff, term2Coeff);
+        variableGCF = v1; // The common variable is v1
 
         const term1Display = formatTermForDisplay(term1Coeff, v1, "<sup>2</sup>");
         const term2Display = formatTermForDisplay(term2Coeff, v1);
         problemString = formatExpressionForDisplay([term1Display, term2Display]);
 
-        gcf = formatTermForDisplay(commonNum, v1);
+        const gcfForProblem = formatTermForDisplay(finalNumericGCF, variableGCF);
         
-        const remTerm1 = formatTermForDisplay(c1, v1);
-        const remTerm2 = formatTermForDisplay(c2); 
-        remainingExpr = `(${formatExpressionForDisplay([remTerm1, remTerm2])})`;
+        const remTerm1Coeff = term1Coeff / finalNumericGCF;
+        const remTerm2Coeff = term2Coeff / finalNumericGCF;
 
-    } else { // Numerical GCF: ac*v1 + bc -> c(av1+b)
-        const commonNum = getRandomInt(2, 7);
-        const c1 = getRandomNonZeroInt(1, 4); 
-        const c2 = getRandomNonZeroInt(2, 5); 
+        const remTerm1Display = formatTermForDisplay(remTerm1Coeff, v1); // v1^2 / v1 = v1
+        const remTerm2Display = formatTermForDisplay(remTerm2Coeff);       // v1 / v1 = constant
+        remainingExpr = `(${formatExpressionForDisplay([remTerm1Display, remTerm2Display])})`;
 
-        const term1Coeff = commonNum * c1;
-        const term2Num = commonNum * c2;
+        return { problemString, details: { gcf: cleanInput(gcfForProblem), remainingExpr: cleanInput(remainingExpr) } };
+
+    } else { // Numerical GCF with a constant term: e.g., 18x + 12 -> 6(3x + 2)
+        let n1_base = getRandomInt(1, 6); 
+        let n2_base = getRandomInt(1, 6); 
+        let common_mult = getRandomInt(2,4); // Ensure a common factor > 1
+
+        let term1Coeff = n1_base * common_mult;
+        let term2Num = n2_base * common_mult;
+
+        // Recalculate true GCF of final coefficients
+        finalNumericGCF = calculateGCD(term1Coeff, term2Num);
 
         const term1Display = formatTermForDisplay(term1Coeff, v1);
-        const term2Display = formatTermForDisplay(term2Num); 
+        const term2Display = formatTermForDisplay(term2Num);
         problemString = formatExpressionForDisplay([term1Display, term2Display]);
         
-        gcf = commonNum.toString();
-        const remTerm1 = formatTermForDisplay(c1, v1);
-        const remTerm2 = formatTermForDisplay(c2);
-        remainingExpr = `(${formatExpressionForDisplay([remTerm1, remTerm2])})`;
+        const gcfForProblem = finalNumericGCF.toString();
+        
+        const remTerm1Coeff = term1Coeff / finalNumericGCF;
+        const remTerm2Num = term2Num / finalNumericGCF;
+
+        const remTerm1Display = formatTermForDisplay(remTerm1Coeff, v1);
+        const remTerm2Display = formatTermForDisplay(remTerm2Num);
+        remainingExpr = `(${formatExpressionForDisplay([remTerm1Display, remTerm2Display])})`;
+        
+        return { problemString, details: { gcf: cleanInput(gcfForProblem), remainingExpr: cleanInput(remainingExpr) } };
     }
-    return { problemString, details: { gcf: cleanInput(gcf), remainingExpr: cleanInput(remainingExpr) } };
 }
 
 
