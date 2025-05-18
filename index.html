@@ -9,7 +9,21 @@
 <body>
     <div id="game-container">
         <header id="game-header">
-            <h1>FactorCast</h1>
+            <nav id="action-buttons">
+            <button id="lab-btn" class="action-button">Laboratory</button>
+            <button id="shop-btn" class="action-button">Shop</button>
+            <button id="explore-btn" class="action-button">Explore</button>
+            <button id="spellbook-btn" class="action-button">Spellbook</button>
+        </nav>
+
+        <div id="lab-options-area" class="display-area hidden">
+            <!-- Options for laboratory actions will appear here -->
+        </div>
+
+        <div id="spell-display-area" class="display-area hidden">
+            <!-- Spells and their 'card art' will be shown here -->
+        </div>
+            
             <div id="player-stats">
                 <span id="stat-hp">HP: 50/50</span> |
                 <span id="stat-mp">MP: 30/30</span> |
@@ -36,6 +50,7 @@
                 <input type="text" id="answer-input" placeholder="Enter your answer here...">
                 <button id="submit-answer-btn" class="action-button">Submit</button>
             </div>
+            <h1>FactorCast</h1>
 
             <!-- For final feedback like "Correct!" or "Incorrect problem..." -->
             <div id="feedback-area" class="display-area hidden">
@@ -43,20 +58,7 @@
             </div>
         </main>
 
-        <nav id="action-buttons">
-            <button id="lab-btn" class="action-button">Laboratory</button>
-            <button id="shop-btn" class="action-button">Shop</button>
-            <button id="explore-btn" class="action-button">Explore</button>
-            <button id="spellbook-btn" class="action-button">Spellbook</button>
-        </nav>
-
-        <div id="lab-options-area" class="display-area hidden">
-            <!-- Options for laboratory actions will appear here -->
-        </div>
-
-        <div id="spell-display-area" class="display-area hidden">
-            <!-- Spells and their 'card art' will be shown here -->
-        </div>
+        
 
     </div>
 
