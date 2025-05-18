@@ -1,5 +1,41 @@
 /* styles.css */
 
+#sound-controls {
+    position: fixed; /* Fixed position relative to the viewport */
+    top: 15px;
+    right: 15px;
+    z-index: 1000; /* Ensure it's on top of other content */
+    display: flex;
+    align-items: center;
+    background-color: rgba(44, 62, 80, 0.7); /* Semi-transparent background like game container */
+    padding: 8px 12px;
+    border-radius: 25px; /* Pill shape */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.sound-control-button {
+    background: none;
+    border: none;
+    color: #ecf0f1; /* Light color for the icon */
+    font-size: 1.4em; /* Adjust emoji size */
+    cursor: pointer;
+    padding: 0 8px; /* Spacing around button */
+    transition: transform 0.2s ease;
+}
+
+.sound-control-button:hover {
+    transform: scale(1.1);
+}
+
+.sound-control-slider {
+    width: 80px; /* Adjust width of the slider */
+    height: 5px; /* Adjust height of the slider track for some browsers */
+    cursor: pointer;
+    /* Basic styling, more advanced styling for range inputs is browser-specific */
+    margin-left: 8px; /* Space between mute button and slider */
+    accent-color: #e74c3c; /* Color for the slider thumb/track on supporting browsers */
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     /* background-color: #3a4c5e; /* Fallback color */
