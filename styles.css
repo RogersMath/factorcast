@@ -1,0 +1,251 @@
+/* styles.css */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #3a4c5e; 
+    color: #ecf0f1; 
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; 
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+#game-container {
+    background-color: #2c3e50; 
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3); 
+    width: 90%;
+    max-width: 800px;
+    text-align: center;
+}
+
+/* --- Title Styling & Animation on Correct Answer --- */
+@keyframes titleEpicPulse {
+    0% { /* Start normal */
+        background-image: none;
+        color: #ffffff;
+        -webkit-background-clip: initial;
+        background-clip: initial;
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    }
+    25%, 75% { /* Go to EPIC and hold */
+        background-image: linear-gradient(to bottom, #ff8c00, #ffa500, #ffd700, #fffacd, #ffffff);
+        color: transparent;
+        -webkit-background-clip: text;
+        background-clip: text;
+        text-shadow: 
+            0 0 5px #fff,
+            0 0 10px #fff,
+            0 0 15px #fff,
+            0 0 20px #ffd700,
+            0 0 30px #ff8c00,
+            0 0 40px #ff8c00;
+    }
+    100% { /* Return to normal */
+        background-image: none;
+        color: #ffffff;
+        -webkit-background-clip: initial;
+        background-clip: initial;
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    }
+}
+
+#game-header h1 {
+    font-size: 3.5em;
+    font-weight: 700;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    
+    /* Default "Normal" Look */
+    background-image: none;
+    color: #ffffff;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3); /* Subtle white glow */
+    
+    /* Transition for any non-animated property changes, if needed */
+    transition: color 0.3s ease, text-shadow 0.3s ease; 
+}
+
+/* Class to trigger the epic pulse animation */
+#game-header h1.title-epic-pulse {
+    animation-name: titleEpicPulse;
+    animation-duration: 1.5s;   /* Duration of one pulse */
+    animation-timing-function: ease-in-out;
+    /* animation-fill-mode: forwards; NO - we want it to return to base style */
+}
+/* --- End Title Styling --- */
+
+
+#player-stats {
+    margin-bottom: 20px;
+    font-size: 0.9em;
+    color: #bdc3c7; 
+}
+
+.display-area {
+    background-color: #34495e; 
+    border: 1px solid #4a6075; 
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px; 
+    min-height: 50px;
+    text-align: left;
+    overflow-wrap: break-word;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); 
+}
+
+#problem-area {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #f1c40f;
+    text-align: center;
+    padding: 20px; 
+}
+
+#step-instruction-area {
+    font-size: 1.1em;
+    font-weight: bold; 
+    color: #f1c40f; 
+    text-align: center;
+    margin-bottom: 10px; 
+    padding: 5px 15px; 
+    border: none; 
+    background-color: transparent; 
+    box-shadow: none; 
+}
+
+
+#input-area {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center; 
+}
+
+#answer-input {
+    flex-grow: 1;
+    padding: 12px 15px; 
+    border-radius: 25px; 
+    border: 1px solid #7f8c8d;
+    background-color: #ecf0f1;
+    color: #2c3e50;
+    font-size: 1em;
+    outline: none;
+    transition: box-shadow 0.3s ease;
+}
+
+#answer-input:focus {
+    box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.5); 
+    border-color: #e74c3c;
+}
+
+.action-button {
+    display: inline-flex; 
+    align-items: center;
+    justify-content: center;
+    padding: 12px 30px; 
+    border-radius: 50px; 
+    border: none;
+    font-size: 1em;
+    font-weight: 600; 
+    cursor: pointer;
+    transition: all 0.2s ease-in-out; 
+    outline: none;
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    margin: 5px;
+}
+
+.action-button { 
+    background-color: #c0392b; 
+    color: white;
+}
+
+.action-button:hover {
+    background-color: #e74c3c; 
+    transform: translateY(-2px); 
+    box-shadow: 0 6px 12px rgba(231, 76, 60, 0.3); 
+}
+
+.action-button:active {
+    transform: translateY(0px); 
+    box-shadow: 0 2px 5px rgba(231, 76, 60, 0.2);
+}
+
+#submit-answer-btn { 
+    background-color: #27ae60; 
+    color: white;
+    padding: 12px 25px; 
+}
+
+#submit-answer-btn:hover {
+    background-color: #2ecc71; 
+    box-shadow: 0 6px 12px rgba(39, 174, 96, 0.3);
+}
+
+#submit-answer-btn:active {
+    box-shadow: 0 2px 5px rgba(39, 174, 96, 0.2);
+}
+
+#action-buttons {
+    display: flex;
+    flex-wrap: wrap; 
+    justify-content: center;
+    gap: 10px; 
+    margin-bottom: 20px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#spell-display-area .spell-card {
+    display: inline-block;
+    border: 2px solid #f1c40f;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 5px;
+    background-color: #2c3e50;
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#spell-display-area .spell-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(241, 196, 15, 0.3);
+}
+
+#spell-display-area .spell-card .emoji-art {
+    font-size: 4.5em; 
+    display: block;
+    margin-bottom: 5px;
+}
+
+#spell-display-area .spell-card .spell-name {
+    font-weight: bold;
+    font-size: 0.9em;
+}
+#spell-display-area .spell-card .spell-cost {
+    font-size: 0.8em;
+    color: #bdc3c7;
+}
+
+.feedback-correct {
+    color: #2ecc71; 
+    font-weight: bold;
+}
+.feedback-incorrect {
+    color: #e74c3c; 
+    font-weight: bold;
+}
+
+.train-new-skill-btn {
+    border: 2px solid #f1c40f; 
+    background-color: #d35400; 
+}
+.train-new-skill-btn:hover {
+    background-color: #e67e22; 
+}
