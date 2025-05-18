@@ -13,7 +13,7 @@ body {
     box-sizing: border-box;
 
     /* --- New Background Image Styles --- */
-    background-image: url('assets/images/FactorCastBG.png');
+    background-image: url('FactorCastBG.png');
     background-size: cover; /* Cover the entire viewport */
     background-position: center center; /* Center the image */
     background-repeat: no-repeat;
