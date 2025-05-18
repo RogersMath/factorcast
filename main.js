@@ -7,7 +7,7 @@ const stepInstructionArea = qs('#step-instruction-area');
 const answerInput = qs('#answer-input');
 const submitAnswerBtn = qs('#submit-answer-btn');
 const feedbackArea = qs('#feedback-area');
-const gameTitle = qs('#game-header h1'); // <<< Get reference to the title
+const gameTitle = qs('main#main-content > h1');
 
 const labBtn = qs('#lab-btn');
 const shopBtn = qs('#shop-btn');
