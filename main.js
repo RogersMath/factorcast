@@ -8,6 +8,9 @@ const answerInput = qs('#answer-input');
 const submitAnswerBtn = qs('#submit-answer-btn');
 const feedbackArea = qs('#feedback-area');
 const gameTitle = qs('main#main-content > h1');
+const backgroundMusic = qs('#background-music');
+const muteBtn = qs('#mute-btn');
+const volumeSlider = qs('#volume-slider');
 
 const labBtn = qs('#lab-btn');
 const shopBtn = qs('#shop-btn');
@@ -25,6 +28,7 @@ let player = {};
 let currentProblem = null;
 let currentFactoringStep = 0;
 let expectedFactors = [];
+let musicStarted = false;
 
 const FACTORING_SKILLS = {
     0: "Novice", 1: "Greatest Common Factor (GCF)", 2: "Difference of Two Squares (DOTS)",
@@ -36,6 +40,19 @@ const DAMAGE_SCALING_FACTOR = 0.75;
 const PROBLEMS_TO_MASTER_SKILL = 5;
 
 // --- Initialization & UI Updates ---
+
+function setupAudioControls() {
+    if (backgroundMusic && volumeSlider) {
+        backgroundMusic.volume = parseFloat(volumeSlider.value); // Set initial volume
+    }
+    // Mute button icon update based on initial muted state (optional, default is unmuted)
+    if (backgroundMusic && backgroundMusic.muted) {
+        muteBtn.textContent = '🔇'; // Muted Speaker Emoji
+    } else if (muteBtn) { // ensure muteBtn exists
+        muteBtn.textContent = '🔊';
+    }
+}
+
 function initializePlayer() {
     player = {
         name: "Arithmancer", hp: 50, maxHp: 50, mp: 30, maxMp: 30, gold: 20, skillLevel: 0,
@@ -426,22 +443,54 @@ function handleSubmitAnswer() {
 
 // --- Event Listeners & Game Start ---
 function setupEventListeners() {
-    labBtn.addEventListener('click', enterLaboratory);
-    submitAnswerBtn.addEventListener('click', handleSubmitAnswer);
-    answerInput.addEventListener('keypress', function(event) { if (event.key === 'Enter') { handleSubmitAnswer(); } });
-    shopBtn.addEventListener('click', () => { 
-        addStoryMessage("The Wandering Emporium is currently closed for restocking. Check back later!", "info");
-        clearProblemArea(); hideElement(labOptionsArea); hideElement(spellDisplayArea); 
+    labBtn.addEventListener('click', () => {
+        attemptToStartMusic(); // <<< ADD
+        enterLaboratory();
     });
-    exploreBtn.addEventListener('click', () => { 
-        addStoryMessage("The wilds of Algebraria are vast and dangerous. Combat system coming soon!", "info");
-        clearProblemArea(); hideElement(labOptionsArea); hideElement(spellDisplayArea); 
+    shopBtn.addEventListener('click', () => {
+        attemptToStartMusic(); // <<< ADD
+        addStoryMessage("The Wandering Emporium is closed...", "info"); /* ... */
     });
-    spellbookBtn.addEventListener('click', () => { 
-        addStoryMessage("You consult your spellbook...", "info");
-        clearProblemArea(); hideElement(labOptionsArea); 
-        displaySpellbook(); 
+    exploreBtn.addEventListener('click', () => {
+        attemptToStartMusic(); // <<< ADD
+        addStoryMessage("The wilds are vast...", "info"); /* ... */
     });
+    spellbookBtn.addEventListener('click', () => {
+        attemptToStartMusic(); // <<< ADD
+        addStoryMessage("You consult your spellbook...", "info"); /* ... */ displaySpellbook();
+    });
+    submitAnswerBtn.addEventListener('click', () => {
+         attemptToStartMusic(); // <<< ADD (also on answer submit)
+         handleSubmitAnswer();
+    });
+    answerInput.addEventListener('keypress', function(event) { 
+        if (event.key === 'Enter') {
+            attemptToStartMusic(); // <<< ADD
+            handleSubmitAnswer(); 
+        }
+    });
+
+    // --- New Listeners for Sound Controls ---
+    if (muteBtn && backgroundMusic) {
+        muteBtn.addEventListener('click', () => {
+            backgroundMusic.muted = !backgroundMusic.muted;
+            muteBtn.textContent = backgroundMusic.muted ? '🔇' : '🔊';
+        });
+    }
+
+    if (volumeSlider && backgroundMusic) {
+        volumeSlider.addEventListener('input', () => {
+            backgroundMusic.volume = parseFloat(volumeSlider.value);
+            // If volume is > 0, ensure it's unmuted and icon reflects that
+            if (backgroundMusic.volume > 0 && backgroundMusic.muted) {
+                backgroundMusic.muted = false;
+                if (muteBtn) muteBtn.textContent = '🔊';
+            } else if (backgroundMusic.volume === 0 && !backgroundMusic.muted) {
+                // Optional: if volume set to 0 via slider, also show mute icon
+                if (muteBtn) muteBtn.textContent = '🔇';
+            }
+        });
+    }
 }
 function displaySpellbook() {
     spellDisplayArea.innerHTML = '<h3>Your Spellbook:</h3>';
@@ -455,8 +504,22 @@ function displaySpellbook() {
     }
     showElement(spellDisplayArea);
 }
+
+function attemptToStartMusic() {
+    if (!musicStarted && backgroundMusic) {
+        backgroundMusic.play().then(() => {
+            musicStarted = true;
+            console.log("Background music started.");
+        }).catch(error => {
+            console.warn("Music autoplay was prevented. User interaction might be needed beyond this.", error);
+            // Browsers often block autoplay until a direct user gesture on the page.
+            // This first click should count, but good to be aware.
+        });
+    }
+}
+
 function initGame() {
-    initializePlayer(); updatePlayerStatsUI(); displayInitialMessage(); setupEventListeners();
+    initializePlayer(); setupAudioControls(); updatePlayerStatsUI(); displayInitialMessage(); setupEventListeners();
     hideElement(labOptionsArea); hideElement(problemArea); hideElement(qs('#input-area'));
     hideElement(stepInstructionArea); hideElement(feedbackArea); hideElement(spellDisplayArea);
 }
