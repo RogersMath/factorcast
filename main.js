@@ -12,6 +12,7 @@ const backgroundMusic = qs('#background-music'); // For checking mute status
 const volumeSlider = qs('#volume-slider'); // For SFX volume
 const sfxCorrectStep = qs('#sfx-correct-step'); // Not directly used, playSoundEffectById takes ID
 const sfxSuccessSolve = qs('#sfx-success-solve'); // Not directly used
+const muteBtn = qs('#mute-btn');
 
 const labBtn = qs('#lab-btn'); /* ... */
 const shopBtn = qs('#shop-btn');
