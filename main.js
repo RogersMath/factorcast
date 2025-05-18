@@ -20,6 +20,7 @@ const shopBtn = qs('#shop-btn');
 const exploreBtn = qs('#explore-btn');
 const spellbookBtn = qs('#spellbook-btn');
 const labOptionsArea = qs('#lab-options-area');
+console.log("labOptionsArea element:", labOptionsArea);
 const spellDisplayArea = qs('#spell-display-area');
 const statHp = qs('#stat-hp'); /* ... other stats ... */
 const statMp = qs('#stat-mp');
