@@ -9,6 +9,8 @@ const submitAnswerBtn = qs('#submit-answer-btn');
 const feedbackArea = qs('#feedback-area');
 const gameTitle = qs('main#main-content > h1');
 const backgroundMusic = qs('#background-music');
+const sfxCorrectStep = qs('#sfx-correct-step');
+const sfxSuccessSolve = qs('#sfx-success-solve');
 const muteBtn = qs('#mute-btn');
 const volumeSlider = qs('#volume-slider');
 
@@ -60,6 +62,13 @@ function initializePlayer() {
         stats: { problemsAttempted: 0, problemsCorrect: 0, problemsIncorrect: 0 },
         trainingProgress: { skillKeyInProgress: null, correctStreak: 0, targetStreak: PROBLEMS_TO_MASTER_SKILL }
     };
+}
+function playSoundEffect(audioElement) {
+    if (audioElement && !backgroundMusic.muted) { // Only play SFX if main music isn't globally muted
+        audioElement.currentTime = 0; // Rewind to start in case it's already playing
+        audioElement.volume = parseFloat(volumeSlider.value) * 0.8; // SFX at 80% of music volume
+        audioElement.play().catch(error => console.warn("SFX play prevented:", error));
+    }
 }
 function updatePlayerStatsUI() {
     if (!player || Object.keys(player).length === 0) return;
