@@ -1,3 +1,22 @@
+// Snippet to ADD to utils.js
+
+/**
+ * Calculates the Greatest Common Divisor (GCD) of two numbers using Euclidean algorithm.
+ * @param {number} a
+ * @param {number} b
+ * @returns {number} The GCD of a and b.
+ */
+function calculateGCD(a, b) {
+    a = Math.abs(a);
+    b = Math.abs(b);
+    while (b) {
+        let t = b;
+        b = a % b;
+        a = t;
+    }
+    return a;
+}
+
 // utils.js
 
 /**
