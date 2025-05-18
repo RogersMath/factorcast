@@ -11,11 +11,12 @@
         <source src="BGmusic.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
-    <!-- SFX Audio tags REMOVED for this revert -->
-    <!--
-    <audio id="sfx-correct-step"> ... </audio>
-    <audio id="sfx-success-solve"> ... </audio>
-    -->
+    <audio id="sfx-correct-step">
+        <source src="correct_step.mp3" type="audio/mpeg"> 
+    </audio>
+    <audio id="sfx-success-solve">
+        <source src="success_solve.mp3" type="audio/mpeg">
+    </audio>
 
     <div id="sound-controls">
         <button id="mute-btn" class="sound-control-button">🔊</button>
@@ -30,6 +31,9 @@
                 <button id="explore-btn" class="action-button">Explore</button>
                 <button id="spellbook-btn" class="action-button">Spellbook</button>
             </nav>
+            <!-- lab-options-area and spell-display-area were here in a previous version you pasted, -->
+            <!-- but they make more sense outside the header if they are main interaction panels. -->
+            <!-- Ensure they are where you intend them to be. For now, I'm assuming they are outside header. -->
             <div id="player-stats">
                 <span id="stat-hp">HP: 50/50</span> |
                 <span id="stat-mp">MP: 30/30</span> |
@@ -37,6 +41,14 @@
                 <span id="stat-skill">Skill: Novice</span>
             </div>
         </header>
+
+        <!-- These divs are for dynamic content, makes sense for them to be siblings of main-content or inside it -->
+        <div id="lab-options-area" class="display-area hidden">
+            <!-- Options for laboratory actions will appear here -->
+        </div>
+        <div id="spell-display-area" class="display-area hidden">
+            <!-- Spells and their 'card art' will be shown here -->
+        </div>
 
         <main id="main-content">
             <div id="story-display" class="display-area">
@@ -48,14 +60,15 @@
                 <input type="text" id="answer-input" placeholder="Enter your answer here...">
                 <button id="submit-answer-btn" class="action-button">Submit</button>
             </div>
-            <h1>FactorCast</h1>
+            <h1>FactorCast</h1> <!-- Title at the bottom of main -->
             <div id="feedback-area" class="display-area hidden"></div>
         </main>
     </div>
 
     <script src="utils.js"></script>
-    <script src="cards.js"></script>
-    <script src="enemies.js"></script>
+    <script src="cards.js"></script> <!-- Assuming you have this -->
+    <script src="enemies.js"></script> <!-- Assuming you have this -->
+    <script src="problem_generators.js"></script> <!-- <<< NEW SCRIPT TAG -->
     <script src="main.js"></script>
 </body>
 </html>
