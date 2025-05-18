@@ -313,12 +313,18 @@ function handleSubmitAnswer() {
         }
     }
 
+    const lastProblemSkillKey = currentProblem ? currentProblem.skillKey : null;
+
     setTimeout(() => {
-        clearProblemArea();
-        if (player.trainingProgress.skillKeyInProgress && currentProblem.skillKey === player.trainingProgress.skillKeyInProgress && player.skillLevel < currentProblem.skillKey) {
-            startPractice(player.trainingProgress.skillKeyInProgress);
+        clearProblemArea(); // Sets currentProblem to null
+
+        if (player.trainingProgress.skillKeyInProgress && 
+            lastProblemSkillKey && // Use the stored skill key
+            lastProblemSkillKey === player.trainingProgress.skillKeyInProgress && 
+            player.skillLevel < lastProblemSkillKey) { // Use the stored skill key
+            startPractice(player.trainingProgress.skillKeyInProgress); // Continue training current skill
         } else {
-            showLabOptions();
+            showLabOptions(); // Back to lab selection
         }
     }, 2500);
 }
