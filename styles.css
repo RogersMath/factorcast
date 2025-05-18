@@ -53,29 +53,48 @@ body {
     }
 }
 
-#game-header h1 {
-    font-size: 3.5em;
+main#main-content > h1 { /* Targets h1 directly inside main-content */
+    font-size: 2.5em; /* Maybe a bit smaller if it's at the very bottom */
     font-weight: 700;
-    margin-top: 10px;
-    margin-bottom: 20px;
+    margin-top: 30px; /* Space above the title */
+    margin-bottom: 20px; /* Space below the title */
+    text-align: center; /* Ensure it's centered */
     
     /* Default "Normal" Look */
     background-image: none;
     color: #ffffff;
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.3); /* Subtle white glow */
     
-    /* Transition for any non-animated property changes, if needed */
     transition: color 0.3s ease, text-shadow 0.3s ease; 
 }
 
-/* Class to trigger the epic pulse animation */
+/* Class to trigger the epic pulse animation - TARGETS THE NEW SELECTOR */
+main#main-content > h1.title-epic-pulse {
+    animation-name: titleEpicPulse; /* Uses the same @keyframes titleEpicPulse */
+    animation-duration: 1.5s;
+    animation-timing-function: ease-in-out;
+}
+/*
+#game-header h1 {
+    font-size: 3.5em;
+    font-weight: 700;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    
+
+    background-image: none;
+    color: #ffffff;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    
+    transition: color 0.3s ease, text-shadow 0.3s ease; 
+}
+
 #game-header h1.title-epic-pulse {
     animation-name: titleEpicPulse;
-    animation-duration: 1.5s;   /* Duration of one pulse */
+    animation-duration: 1.5s;   
     animation-timing-function: ease-in-out;
-    /* animation-fill-mode: forwards; NO - we want it to return to base style */
 }
-/* --- End Title Styling --- */
+*/
 
 
 #player-stats {
