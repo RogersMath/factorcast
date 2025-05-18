@@ -31,9 +31,6 @@
                 <button id="explore-btn" class="action-button">Explore</button>
                 <button id="spellbook-btn" class="action-button">Spellbook</button>
             </nav>
-            <!-- lab-options-area and spell-display-area were here in a previous version you pasted, -->
-            <!-- but they make more sense outside the header if they are main interaction panels. -->
-            <!-- Ensure they are where you intend them to be. For now, I'm assuming they are outside header. -->
             <div id="player-stats">
                 <span id="stat-hp">HP: 50/50</span> |
                 <span id="stat-mp">MP: 30/30</span> |
@@ -42,7 +39,6 @@
             </div>
         </header>
 
-        <!-- These divs are for dynamic content, makes sense for them to be siblings of main-content or inside it -->
         <div id="lab-options-area" class="display-area hidden">
             <!-- Options for laboratory actions will appear here -->
         </div>
@@ -65,10 +61,15 @@
         </main>
     </div>
 
+    <!-- Script Load Order is Important! -->
     <script src="utils.js"></script>
-    <script src="cards.js"></script> <!-- Assuming you have this -->
-    <script src="enemies.js"></script> <!-- Assuming you have this -->
-    <script src="problem_generators.js"></script> <!-- <<< NEW SCRIPT TAG -->
-    <script src="main.js"></script>
+    <script src="dom_elements.js"></script> <!-- Defines global DOM element vars -->
+    <script src="cards.js"></script> <!-- Defines SPELL_TEMPLATES, ITEM_TEMPLATES -->
+    <script src="enemies.js"></script> <!-- Defines ENEMY_TEMPLATES -->
+    <script src="problem_generators.js"></script> <!-- Defines problem generation functions -->
+    <script src="ui_feedback.js"></script> <!-- Defines UI update and feedback functions -->
+    <script src="laboratory.js"></script> <!-- Defines lab interaction functions -->
+    <script src="event_handlers.js"></script> <!-- Defines event listeners and input handling -->
+    <script src="main.js"></script> <!-- Main game orchestrator, initializes -->
 </body>
 </html>
