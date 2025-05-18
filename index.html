@@ -9,34 +9,27 @@
 <body>
     <audio id="background-music" loop>
         <source src="BGmusic.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
     </audio>
-    <audio id="sfx-correct-step">
-        <source src="correct_step.mp3" type="audio/mpeg"> 
-    </audio>
-    <audio id="sfx-success-solve">
-        <source src="success_solve.mp3" type="audio/mpeg">
-    </audio>
+    <!-- SFX Audio tags REMOVED for this revert -->
+    <!--
+    <audio id="sfx-correct-step"> ... </audio>
+    <audio id="sfx-success-solve"> ... </audio>
+    -->
+
     <div id="sound-controls">
-        <button id="mute-btn" class="sound-control-button">🔊</button> <!-- Speaker High Volume Emoji -->
+        <button id="mute-btn" class="sound-control-button">🔊</button>
         <input type="range" id="volume-slider" class="sound-control-slider" min="0" max="1" step="0.05" value="0.5">
     </div>
+
     <div id="game-container">
         <header id="game-header">
             <nav id="action-buttons">
-            <button id="lab-btn" class="action-button">Laboratory</button>
-            <button id="shop-btn" class="action-button">Shop</button>
-            <button id="explore-btn" class="action-button">Explore</button>
-            <button id="spellbook-btn" class="action-button">Spellbook</button>
-        </nav>
-
-        <div id="lab-options-area" class="display-area hidden">
-            <!-- Options for laboratory actions will appear here -->
-        </div>
-
-        <div id="spell-display-area" class="display-area hidden">
-            <!-- Spells and their 'card art' will be shown here -->
-        </div>
-            
+                <button id="lab-btn" class="action-button">Laboratory</button>
+                <button id="shop-btn" class="action-button">Shop</button>
+                <button id="explore-btn" class="action-button">Explore</button>
+                <button id="spellbook-btn" class="action-button">Spellbook</button>
+            </nav>
             <div id="player-stats">
                 <span id="stat-hp">HP: 50/50</span> |
                 <span id="stat-mp">MP: 30/30</span> |
@@ -47,38 +40,22 @@
 
         <main id="main-content">
             <div id="story-display" class="display-area">
-                <p>Welcome, Arithmancer! The land of Algebraria is troubled by a Great Discontinuity. Only by mastering the ancient art of Factoring can you hope to restore balance. Your journey begins...</p>
+                <p>Welcome, Arithmancer! The land of Algebraria is troubled by a Great Discontinuity...</p>
             </div>
-
-            <div id="problem-area" class="display-area hidden">
-                <!-- Math problems will appear here -->
-            </div>
-
-            <!-- NEW/REPOSITIONED: For step-by-step prompts like "Enter the GCF:" -->
-            <div id="step-instruction-area" class="display-area hidden">
-                <!-- Step-by-step instructions will appear here -->
-            </div>
-
-            <div id="input-area" class="hidden"> <!-- Start hidden -->
+            <div id="problem-area" class="display-area hidden"></div>
+            <div id="step-instruction-area" class="display-area hidden"></div>
+            <div id="input-area" class="hidden">
                 <input type="text" id="answer-input" placeholder="Enter your answer here...">
                 <button id="submit-answer-btn" class="action-button">Submit</button>
             </div>
             <h1>FactorCast</h1>
-
-            <!-- For final feedback like "Correct!" or "Incorrect problem..." -->
-            <div id="feedback-area" class="display-area hidden">
-                <!-- Feedback on final answers will appear here -->
-            </div>
+            <div id="feedback-area" class="display-area hidden"></div>
         </main>
-
-        
-
     </div>
 
     <script src="utils.js"></script>
     <script src="cards.js"></script>
     <script src="enemies.js"></script>
-    <!-- <script src="quests.js"></script> -->
     <script src="main.js"></script>
 </body>
 </html>
